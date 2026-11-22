@@ -13,3 +13,15 @@
     (if (null? rest)
         acc
         (loop (cdr rest) (+ acc 1)))))
+
+;; my-map : (any -> any) list -> list
+;; Applies f to every top-level element of lst and returns the new
+;; list of results, in the same order.
+;; Recursive reading: mapping f over () gives (); mapping f over
+;; (a . rest) gives (f a) consed onto the mapping of f over rest.
+;; Only one level deep: f decides what to do with sublists.
+(define (my-map f lst)
+  (if (null? lst)
+      '()
+      (cons (f (car lst))
+            (my-map f (cdr lst))))) 
