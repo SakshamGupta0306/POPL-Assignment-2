@@ -64,3 +64,41 @@ clue(7, Solution) :-
 clue(8, Solution) :-
     member(p(_Name, research, Lang, data), Solution),
     Lang \= javascript.
+
+% =============================================================================
+% Task P1.a: solve and main/0
+% =============================================================================
+
+% solve(Solution):
+% Generates a valid assignment satisfying all clues 1 through 8.
+solve(Solution) :-
+    valid_solution(Solution),
+    clue(1, Solution),
+    clue(2, Solution),
+    clue(3, Solution),
+    clue(4, Solution),
+    clue(5, Solution),
+    clue(6, Solution),
+    clue(7, Solution),
+    clue(8, Solution).
+
+% print_solution(Solution):
+% Prints the solution in the exact required layout:
+% Name = [Dept, Lang, Proj]
+print_solution([
+    p('Alex', DeptA, LangA, ProjA),
+    p('Ben',   DeptB, LangB, ProjB),
+    p('Carla', DeptC, LangC, ProjC),
+    p('Dana',  DeptD, LangD, ProjD)
+]) :-
+    format('Alex = [~w, ~w, ~w]~n', [DeptA, LangA, ProjA]),
+    format('Ben = [~w, ~w, ~w]~n', [DeptB, LangB, ProjB]),
+    format('Carla = [~w, ~w, ~w]~n', [DeptC, LangC, ProjC]),
+    format('Dana = [~w, ~w, ~w]~n', [DeptD, LangD, ProjD]).
+
+% main/0:
+% Finds one solution satisfying clues 1 to 8 and prints it.
+main :-
+    solve(Solution),
+    !,
+    print_solution(Solution).
