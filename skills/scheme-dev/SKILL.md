@@ -38,6 +38,17 @@ description: Development guide, conventions, and review checklist for Racket/Sch
    - Idiomatic Lisp kebab-case (`insert-if-short`, `my-length`).
    - Clean recursive reading documented in comments.
 
+## How to Run and Test Code
+- Run from the repository root. Replace `<id>` with the group ID.
+- S1 solution file: `racket code/<id>_q3.rkt` (must print nothing and must not crash).
+- S1 tests (standalone, loads the solution itself): `racket tests/test_q3.rkt`
+- S2 solution file: `racket code/<id>_q4.rkt`; S2 tests: `bash tests/test_q4.sh code/<id>_q4.rkt`
+- Grader style check for any function: append calls to a COPY of the solution file and run the copy, e.g. `(cat code/<id>_q4.rkt; echo '(print-insert-result)') > /tmp/run.rkt; echo "7 () 3" | racket /tmp/run.rkt`. Never add calls to the solution file itself.
+- Test files may use any library (`racket/port`, `racket/runtime-path`); only solution files are restricted to the allowed built-ins.
+- Every assignment example must be a test, plus edge cases: `()`, a single node/element, deeply nested input (depth 100), long lists (10,000 elements), a tree 100,000 nodes deep.
+- Compare printed output to the exact expected string, including the trailing newline.
+- Before finishing, search the file for forbidden names: `length`, `append`, `reverse`, `map`, `filter`, `member`, `memq`, `list-ref`, `list-tail`, `set!`, `vector`, `hash`, `string`, `for`, `do`.
+
 ## Self-Review Checklist
 Before finalizing any Scheme code:
 - [ ] Does the file start with `#lang racket/base`?
@@ -51,5 +62,5 @@ Before finalizing any Scheme code:
 1. **Accidental Built-in Usage:** Defaulting to built-ins like `length`, `append`, `reverse`, or `map` instead of implementing custom versions.
 2. **Top-Level Execution Calls:** Leaving example calls like `(print-inorder t1)` active at the top level of the file.
 3. **Stack Overflow on Deep/Large Lists:** Non-tail-recursive implementations failing on large lists (10,000 elements) or deep nesting (depth 100).
-4. **Improper Empty List Handling:** Treating empty list `()` as an atom or failing to handle `()` when inserting conditionally.
-
+4. **Dialect Drift:** Using `list?`, `foldl`, `assoc` variants, `else`-less `cond`, or `racket/list` functions that are not in the allowed list.
+5. **Improper Empty List Handling:** Treating empty list `()` as an atom or failing to handle `()` when inserting conditionally.

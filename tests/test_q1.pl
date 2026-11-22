@@ -2,7 +2,11 @@
 % Tests for Problem 1 (id_q1.pl)
 % =============================================================================
 
-:- consult('../code/id_q1.pl').
+% Dynamically consult 37_q1.pl or id_q1.pl
+:- (   exists_file('../code/37_q1.pl')
+   ->  consult('../code/37_q1.pl')
+   ;   consult('../code/id_q1.pl')
+   ).
 :- use_module(library(lists)).
 
 % -----------------------------------------------------------------------------
