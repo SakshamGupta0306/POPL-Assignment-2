@@ -24,4 +24,15 @@
   (if (null? lst)
       '()
       (cons (f (car lst))
-            (my-map f (cdr lst))))) 
+            (my-map f (cdr lst)))))
+
+(define (insert-if-short x lst n)
+  (let ((processed
+         (my-map (lambda (e)
+                   (if (or (pair? e) (null? e))
+                       (insert-if-short x e n)
+                       e))
+                 lst)))
+    (if (< (my-length lst) n)
+        (cons x processed)
+        processed))) 
