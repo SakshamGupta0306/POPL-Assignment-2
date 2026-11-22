@@ -38,3 +38,25 @@
   (newline)
   (display (postorder-acc tree '()))
   (newline))
+
+
+
+(define (tree-stats tree)
+  (if (null? tree)
+      (list 0 0)
+      (let* ((left-stats (tree-stats (cadr tree)))
+             (right-stats (tree-stats (caddr tree)))
+             (height (+ 1
+                        (max (car left-stats)
+                             (car right-stats))))
+             (leaves
+              (if (and (null? (cadr tree))
+                       (null? (caddr tree)))
+                  1
+                  (+ (cadr left-stats)
+                     (cadr right-stats)))))
+        (list height leaves))))
+
+(define (print-height-and-leaves tree)
+  (display (tree-stats tree))
+  (newline))

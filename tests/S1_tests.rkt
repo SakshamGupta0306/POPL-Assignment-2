@@ -44,3 +44,33 @@
 (display "Test 9: Empty tree")
 (newline)
 (print-all-traversals '())
+
+
+
+(display "Test 10: Complete binary tree")
+(newline)
+(print-height-and-leaves t1)
+
+(define t2-height '(1 () (2 () (3 () ()))))
+
+(display "Test 11: Right-skewed tree")
+(newline)
+(print-height-and-leaves t2-height)
+
+(define t3-height '(a (b () ()) (c () ())))
+
+(display "Test 12: Tree with two leaves")
+(newline)
+(print-height-and-leaves t3-height)
+
+(display "Test 13: Empty tree")
+(newline)
+(print-height-and-leaves '())
+
+(display "Test 14: Single-node tree")
+(newline)
+(print-height-and-leaves '(1 () ()))
+
+(display "Test 15: Left-skewed tree")
+(newline)
+(print-height-and-leaves '(3 (2 (1 () ()) ()) ()))
