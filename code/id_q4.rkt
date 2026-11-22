@@ -26,16 +26,36 @@
       (cons (f (car lst))
             (my-map f (cdr lst)))))
 
+;; make-inserter : atom (number -> boolean) -> (list -> list)
+;; Returns a one-argument function that inserts x at the front of
+;; every list, at every nesting level (the list it is given included),
+;; whose ORIGINAL length satisfies len-ok?.
+;; Recursive reading of the returned function ins: process every
+;; element of lst (sublists by ins itself, atoms unchanged); then, if
+;; (len-ok? (my-length lst)) holds, cons x onto the front of the result.
+;; An element is a list if it is a pair or (), since the allowed
+;; built-ins have no list?.
+;; letrec lets ins refer to itself for the nested lists.
+(define (make-inserter x len-ok?)
+  (letrec ((ins
+            (lambda (lst)
+              (let ((processed
+                     (my-map (lambda (e)
+                               (if (or (pair? e) (null? e))
+                                   (ins e)
+                                   e))
+                             lst)))
+                (if (len-ok? (my-length lst))
+                    (cons x processed)
+                    processed)))))
+    ins))
+
+;; insert-if-short : atom list integer -> list
+;; Inserts x at the front of every list (at every nesting level, the
+;; top-level list included) whose original length is < n.
+;; Defined with make-inserter: the length test is (lambda (len) (< len n)).
 (define (insert-if-short x lst n)
-  (let ((processed
-         (my-map (lambda (e)
-                   (if (or (pair? e) (null? e))
-                       (insert-if-short x e n)
-                       e))
-                 lst)))
-    (if (< (my-length lst) n)
-        (cons x processed)
-        processed))) 
+  ((make-inserter x (lambda (len) (< len n))) lst))
 
 ;; print-insert-result : -> void
 ;; Reads x, lst and n from standard input (in that order) with read,
