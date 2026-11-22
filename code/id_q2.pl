@@ -162,3 +162,31 @@ generate_equation(List, Equation) :-
     expr_string(RExpr, RS),
     string_concat(LS, "=", S1),
     string_concat(S1, RS, Equation).
+
+% all_equations(+List, -Equations)
+%
+% Declarative meaning:
+%   Equations is the sorted, duplicate-free list of all strings Equation
+%   such that generate_equation(List, Equation) holds. It is [] when no
+%   valid equation exists, including for lists with fewer than two elements.
+%
+% Procedural meaning:
+%   findall/3 collects every solution of generate_equation/2 on
+%   backtracking, and sort/2 orders them by standard order of terms and
+%   removes duplicates. findall/3 succeeds with [] when there are no
+%   solutions, so all_equations/2 never fails for a proper list.
+all_equations(List, Equations) :-
+    findall(E, generate_equation(List, E), Es0),
+    sort(Es0, Equations).
+
+% count_equations(+List, -N)
+%
+% Declarative meaning:
+%   N is the number of distinct valid equations for List, that is, the
+%   length of the list given by all_equations/2.
+%
+% Procedural meaning:
+%   Compute all_equations/2, then take its length.
+count_equations(List, N) :-
+    all_equations(List, Equations),
+    length(Equations, N).
