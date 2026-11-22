@@ -214,3 +214,45 @@ run_category_c :-
     test_c1_solve_derivation,
     test_c2_output_format,
     format('--- Category C Tests Completed Successfully ---~n').
+
+
+% -----------------------------------------------------------------------------
+% Category D: Solution Counting and Repair (Tasks P1.b & P1.c)
+% -----------------------------------------------------------------------------
+
+% Test D1: Empty active clue list returns all 13824 solutions
+test_d1_empty_active_list :-
+    count_solutions([], N),
+    assert_equal(N, 13824, 'Test D1: count_solutions([], 13824)').
+
+% Test D2: Single active clue (Clue 4: Ben has web, not testing -> 13824 * (1/4) * (3/4) = 2592)
+test_d2_single_clue :-
+    count_solutions([4], N),
+    assert_equal(N, 2592, 'Test D2: count_solutions([4], 2592)').
+
+% Test D3: Monotonic pruning of solution space on subsets
+test_d3_subset_monotonicity :-
+    count_solutions([1], N1),
+    count_solutions([1,2], N2),
+    count_solutions([1,2,3], N3),
+    assert_true((N1 >= N2, N2 >= N3), 'Test D3: Subsets prune search space monotonically').
+
+% Test D4: All 8 clues give exactly N = 3
+test_d4_all_8_clues :-
+    count_solutions([1,2,3,4,5,6,7,8], N),
+    assert_equal(N, 3, 'Test D4: count_solutions([1..8], 3) matches P1.b and P1_REPORT.md').
+
+% Test D5: All 9 clues give unique solution N = 1
+test_d5_repair_with_clue9 :-
+    count_solutions([1,2,3,4,5,6,7,8,9], N),
+    assert_equal(N, 1, 'Test D5: count_solutions([1..9], 1) matches P1.c').
+
+% Runner for Category D
+run_category_d :-
+    format('--- Running Category D Tests ---~n'),
+    test_d1_empty_active_list,
+    test_d2_single_clue,
+    test_d3_subset_monotonicity,
+    test_d4_all_8_clues,
+    test_d5_repair_with_clue9,
+    format('--- Category D Tests Completed Successfully ---~n').
