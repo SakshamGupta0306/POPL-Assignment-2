@@ -12,8 +12,9 @@
 %   Evaluate both subtrees recursively, then combine their values. Because the
 %   subtrees are evaluated first, a failing nested division makes the whole
 %   evaluation fail. The predicate never raises an exception on a division by
-%   zero, since the divisor is tested before the division is performed. No cut
-%   is needed, as the clauses are mutually exclusive on the principal functor.
+%   zero, since the divisor is tested before the division is performed. The
+%   cut in the integer clause only removes the choice point for integers; the
+%   other clauses are exclusive on the principal functor.
 eval_expr(Expr, Value) :-
     integer(Expr),
     !,
@@ -54,11 +55,10 @@ eval_expr(A/B, Value) :-
 %   built, an invalid division fails immediately and prunes that whole
 %   subtree of the search. Each tree is produced exactly once: its root
 %   operator and its split point determine the children uniquely.
-
 expr_over([N], N, N).
 expr_over(List, Expr, Value) :-
     List = [_,_|_],
-    Prefix = [_|_],                 % fixed before append/3, so no useless generation
+    Prefix = [_|_],
     append(Prefix, Suffix, List),
     Suffix = [_|_],
     expr_over(Prefix, L, VL),
@@ -150,9 +150,8 @@ prec(/, 2).
 %   shared variable Value forces the two values to be equal, so
 %   unequal pairs fail at once. The two trees are then rendered with
 %   expr_string/2 and joined around "=".
-
 generate_equation(List, Equation) :-
-    List = [_,_|_],              % at least two elements; fails for [] and [_]
+    List = [_,_|_],
     Left = [_|_],
     append(Left, Right, List),
     Right = [_|_],
@@ -166,18 +165,92 @@ generate_equation(List, Equation) :-
 % all_equations(+List, -Equations)
 %
 % Declarative meaning:
-%   Equations is the sorted, duplicate-free list of all strings Equation
-%   such that generate_equation(List, Equation) holds. It is [] when no
-%   valid equation exists, including for lists with fewer than two elements.
+%   Equations is the sorted, duplicate-free list of all strings "L=R" such
+%   that, for some split of List into a non-empty prefix and a non-empty
+%   suffix, L is the canonical string of an expression over the prefix, R
+%   is the canonical string of an expression over the suffix, and both
+%   expressions have the same value. It is [] when none exist, including
+%   for lists with fewer than two elements.
 %
 % Procedural meaning:
-%   findall/3 collects every solution of generate_equation/2 on
-%   backtracking, and sort/2 orders them by standard order of terms and
-%   removes duplicates. findall/3 succeeds with [] when there are no
-%   solutions, so all_equations/2 never fails for a proper list.
+%   For each split point, split_equations/3 builds the equations of that
+%   split by joining the two sides on equal value. The per-split results
+%   are concatenated and passed to sort/2 for ordering and de-duplication.
+%   findall/3 yields [] when split_list/3 fails, so short lists give [].
 all_equations(List, Equations) :-
-    findall(E, generate_equation(List, E), Es0),
+    findall(Es,
+            ( split_list(List, Left, Right),
+              split_equations(Left, Right, Es) ),
+            Groups),
+    append(Groups, Es0),
     sort(Es0, Equations).
+
+% split_list(+List, -Left, -Right)
+% Left and Right are a non-empty prefix and suffix with Left+Right = List.
+% Fails for lists with fewer than two elements.
+split_list(List, Left, Right) :-
+    List = [_,_|_],
+    Left = [_|_],
+    append(Left, Right, List),
+    Right = [_|_].
+
+% split_equations(+Left, +Right, -Equations)
+%
+% Declarative meaning:
+%   Equations holds the strings "L=R" for every pair of an expression over
+%   Left and an expression over Right that have the same value.
+%
+% Procedural meaning:
+%   Each side is computed once as Value-Expr pairs and sorted by value with
+%   keysort/2. join_sorted/3 then walks both sorted lists in step, so no
+%   side is regenerated, and only matching pairs are rendered to strings.
+split_equations(Left, Right, Equations) :-
+    findall(V-E, expr_over(Left, E, V), LP0),
+    findall(V-E, expr_over(Right, E, V), RP0),
+    keysort(LP0, LP),
+    keysort(RP0, RP),
+    join_sorted(LP, RP, Equations).
+
+% join_sorted(+LeftPairs, +RightPairs, -Equations)
+% Both inputs are Value-Expr lists sorted by Value. Equations is the list
+% of "L=R" strings for every left and right expression with equal value.
+join_sorted([], _, []).
+join_sorted([_|_], [], []).
+join_sorted([K1-X1|LT], [K2-X2|RT], Es) :-
+    compare(Ord, K1, K2),
+    join_step(Ord, K1-X1, LT, K2-X2, RT, Es).
+
+% join_step(+Order, +LeftHead, +LeftTail, +RightHead, +RightTail, -Es)
+% Advance the side with the smaller value; on equal values, join the groups.
+join_step(<, _, LT, RH, RT, Es) :-
+    join_sorted(LT, [RH|RT], Es).
+join_step(>, LH, LT, _, RT, Es) :-
+    join_sorted([LH|LT], RT, Es).
+join_step(=, K-X1, LT, _-X2, RT, Es) :-
+    take_group(K, LT, LXs, LRest),
+    take_group(K, RT, RXs, RRest),
+    maplist(expr_string, [X1|LXs], LSs),
+    maplist(expr_string, [X2|RXs], RSs),
+    findall(S,
+            ( member(LS, LSs),
+              member(RS, RSs),
+              string_concat(LS, "=", S1),
+              string_concat(S1, RS, S) ),
+            Here),
+    join_sorted(LRest, RRest, More),
+    append(Here, More, Es).
+
+% take_group(+Key, +Pairs, -Exprs, -Rest)
+% Exprs are the expressions at the front of Pairs whose value is Key;
+% Rest is the remaining pairs.
+take_group(K, [K2-X|T], Xs, Rest) :-
+    (   K2 == K
+    ->  Xs = [X|Xs1],
+        take_group(K, T, Xs1, Rest)
+    ;   Xs = [],
+        Rest = [K2-X|T]
+    ).
+take_group(_, [], [], []).
 
 % count_equations(+List, -N)
 %
