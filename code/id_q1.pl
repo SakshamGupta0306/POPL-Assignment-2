@@ -102,3 +102,28 @@ main :-
     solve(Solution),
     !,
     print_solution(Solution).
+
+% =============================================================================
+% Task P1.b: count_solutions/2
+% =============================================================================
+
+% all_clues_hold(ClueNumbers, Solution):
+% True if every clue number in ClueNumbers holds for Solution.
+all_clues_hold([], _Solution).
+all_clues_hold([C|Cs], Solution) :-
+    clue(C, Solution),
+    all_clues_hold(Cs, Solution).
+
+% satisfies_active(Active, Solution):
+% Generates a valid solution and verifies only the clues in Active.
+satisfies_active(Active, Solution) :-
+    valid_solution(Solution),
+    all_clues_hold(Active, Solution).
+
+% count_solutions(Active, N):
+% Active is a list of clue numbers (for example [1,2,3,4,5,6,7,8]).
+% N is unified with the number of distinct solutions satisfying exactly
+% the clues in Active and ignoring all others.
+count_solutions(Active, N) :-
+    findall(Sol, satisfies_active(Active, Sol), Solutions),
+    length(Solutions, N).
