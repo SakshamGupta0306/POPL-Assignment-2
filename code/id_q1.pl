@@ -3,6 +3,10 @@
 
 :- use_module(library(lists)).
 
+% =============================================================================
+% Domain and Candidate Generation
+% =============================================================================
+
 % valid_solution(Solution):
 % Solution is a list of four terms p(Name, Dept, Lang, Proj) in fixed order:
 % 'Alex', 'Ben', 'Carla', 'Dana'.
@@ -19,7 +23,7 @@ valid_solution([
     permutation(['AI', web, embedded, data], [ProjA, ProjB, ProjC, ProjD]).
 
 % =============================================================================
-% Clues 1 to 8
+% Clues 1 to 9
 % clue(N, Solution) succeeds exactly when clue N holds in a fully filled-in Solution.
 % =============================================================================
 
@@ -64,6 +68,11 @@ clue(7, Solution) :-
 clue(8, Solution) :-
     member(p(_Name, research, Lang, data), Solution),
     Lang \= javascript.
+
+% Task P1.c: Clue 9
+% CLUE 9: The friend whose favorite language is Java prefers the embedded project.
+clue(9, Solution) :-
+    member(p(_Name, _Dept, java, embedded), Solution).
 
 % =============================================================================
 % Task P1.a: solve and main/0
