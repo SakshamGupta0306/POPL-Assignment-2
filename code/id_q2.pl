@@ -133,3 +133,32 @@ prec(+, 1).
 prec(-, 1).
 prec(*, 2).
 prec(/, 2).
+
+% generate_equation(+List, -Equation)
+%
+% Declarative meaning:
+%   Equation is a string "L=R" where L is the canonical string of an
+%   expression over a non-empty prefix of List and R is the canonical
+%   string of an expression over the remaining non-empty suffix. Every
+%   number of List is used once, in order, and both sides have the same
+%   integer value. It fails if no such equation exists, including for
+%   lists with fewer than two elements.
+%
+% Procedural meaning:
+%   List is split with append/3 into a non-empty Left and Right list.
+%   expr_over/3 builds an expression and its value for each side. The
+%   shared variable Value forces the two values to be equal, so
+%   unequal pairs fail at once. The two trees are then rendered with
+%   expr_string/2 and joined around "=".
+
+generate_equation(List, Equation) :-
+    List = [_,_|_],              % at least two elements; fails for [] and [_]
+    Left = [_|_],
+    append(Left, Right, List),
+    Right = [_|_],
+    expr_over(Left, LExpr, Value),
+    expr_over(Right, RExpr, Value),
+    expr_string(LExpr, LS),
+    expr_string(RExpr, RS),
+    string_concat(LS, "=", S1),
+    string_concat(S1, RS, Equation).
