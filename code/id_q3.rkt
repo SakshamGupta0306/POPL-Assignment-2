@@ -1,4 +1,13 @@
 #lang racket/base
-;; CS F301 Assignment 2 - Problem S1: Binary Tree Traversals
-;; Only definitions in this file. Do not call functions at top level.
 
+(define (inorder-acc tree acc)
+  (if (null? tree)
+      acc
+      (inorder-acc
+       (cadr tree)
+       (cons (car tree)
+             (inorder-acc (caddr tree) acc)))))
+
+(define (print-inorder tree)
+  (display (inorder-acc tree '()))
+  (newline))
