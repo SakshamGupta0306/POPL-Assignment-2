@@ -181,3 +181,36 @@ run_category_b :-
     test_b8_clue8,
     test_b9_clue9,
     format('--- Category B Tests Completed Successfully ---~n').
+
+
+% -----------------------------------------------------------------------------
+% Category C: Solver & Output Verification (Task P1.a)
+% -----------------------------------------------------------------------------
+
+% Test C1: solve/1 derives a valid solution satisfying Clues 1 to 8
+test_c1_solve_derivation :-
+    solve(Solution),
+    !,
+    all_clues_hold([1,2,3,4,5,6,7,8], Solution),
+    assert_true(true, 'Test C1: solve/1 derives valid solution satisfying Clues 1 to 8').
+
+% Test C2: main/0 prints exactly 4 lines in exact format: Name = [Dept, Lang, Proj]
+test_c2_output_format :-
+    with_output_to(string(Out), main),
+    split_string(Out, "\n", "\r", AllLines),
+    % Exclude empty trailing string after last newline
+    exclude(=(""), AllLines, Lines),
+    length(Lines, 4),
+    Lines = [Line1, Line2, Line3, Line4],
+    sub_string(Line1, _, _, _, "Alex = ["),
+    sub_string(Line2, _, _, _, "Ben = ["),
+    sub_string(Line3, _, _, _, "Carla = ["),
+    sub_string(Line4, _, _, _, "Dana = ["),
+    assert_true(true, 'Test C2: main/0 output has exactly 4 formatted lines for Alex, Ben, Carla, Dana').
+
+% Runner for Category C
+run_category_c :-
+    format('--- Running Category C Tests ---~n'),
+    test_c1_solve_derivation,
+    test_c2_output_format,
+    format('--- Category C Tests Completed Successfully ---~n').
